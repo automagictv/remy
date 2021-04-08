@@ -33,13 +33,14 @@ def format_message_and_get_parse_mode(recipe):
     logging.info(
         f"Formatting the recipe: {recipe['title']} | id: {recipe['id']}")
     parse_mode = telegram.ParseMode.HTML
-    message = sp.SpoonacularFacade.format_recipe_data_as_html(recipe)
+    message = sp.SpoonacularFacade.format_recipe_data_as_html(
+        recipe)
 
     if len(message) > config.TELEGRAM_MESSAGE_CHAR_LIMIT:
         logging.info("Recipe too long! Formatting a link instead.")
         link = sp.SpoonacularFacade.format_recipe_title_link_as_markdown(recipe)
         message = (
-            f"This recipe was too long to send here! Here's the "
+            f"This recipe was too long to send here\! Here's the "
             f"link instead: {link}"
         )
         parse_mode = telegram.ParseMode.MARKDOWN_V2
@@ -64,7 +65,28 @@ def start(update, context):
 def recipes_for_ingredients(update, context):
     """Returns html formatted recipes given the input string."""
     ingredients = ''.join(context.args).lower()
+    if not ingredients:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="I need ingredients to search\!",
+            parse_mode=telegram.ParseMode.MARKDOWN_V2
+        )
+        return
+
     recipe_ids = spoon.get_recipe_ids_for_ingredients(ingredients)
+
+    if not recipe_ids:
+        logging.info("No recipes found.")
+        message = (
+            "Yikes! I couldn't find anything for those ingredients. "
+            "Sorry about that. Please try some different ones."
+        )
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=message
+        )
+        return
+
     recipes = spoon.get_recipes_for_ids(recipe_ids)
 
     for recipe in recipes:
@@ -80,7 +102,27 @@ def recipes_for_ingredients(update, context):
 
 def random_recipe(update, context):
     """Returns html formatted random recipe."""
-    tags = ','.join(context.args).lower()
+    # Clean up arguments so we can validate tags
+    all_args = ",".join(context.args).lower().split(",")
+    for value in all_args:
+        if value not in config.ALLOWED_TAGS:
+            message = (
+                "Only the following are allowed as tags: "
+                "[Diets](https://spoonacular.com/food-api/docs#Diets), "
+                "[Intolerances](https://spoonacular.com/food-api/docs#Intolerances), "
+                "[Cuisines](https://spoonacular.com/food-api/docs#Cuisines), "
+                "and [Meal Types](https://spoonacular.com/food-api/docs#Meal-Types)\."
+                " Please try your search again with a valid tag\."
+            )
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=message,
+                parse_mode=telegram.ParseMode.MARKDOWN_V2
+            )
+            return
+
+    # Consolidate valid tags into single query
+    tags = ",".join(all_args)
     recipe = spoon.get_random_recipe(tags=tags)
     message, parse_mode = format_message_and_get_parse_mode(recipe)
 
@@ -137,19 +179,25 @@ def unknown(update, context):
     )
 
 
-def error_handler(update, object, context):
+def error_handler(update, context):
     """Handles errors we get while executing commands."""
     logging.error(
         msg="Something went wrong when trying to handle an update.",
         exc_info=context.error)
+    
+    # Handle quota errors
+    if isinstance(context.error, sp.QuotaError):
+        message = "We've hit our recipe quota for today! Come back tomorrow."
+    # Catchall for other errors
+    else:
+        message = "Something went wrong with that last one! Try again or use /help"
 
-    message = "Something went wrong with that last one! Try again or use /help"
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=message
     )
 
-
+# Handler registration
 START_HANDLER = CommandHandler('start', start)
 RECIPE_INGREDIENTS_HANDLER = CommandHandler('recipe', recipes_for_ingredients)
 RANDOM_RECIPE_HANDLER = CommandHandler('random', random_recipe)
