@@ -27,6 +27,7 @@ class HTMLStripper(HTMLParser):
 
 def strip_tags(html):
     """Strips text of HTML tags to avoid telegram errors.
+
     Args:
         html: string, representing recipe data.
     Returns:
@@ -43,6 +44,7 @@ class SpoonacularFacade(object):
 
     def __init__(self, api_key=config.SPOONACULAR_KEY):
         """Constructs a SpoonacularFacade object.
+
         Args:
             api_key: str, the API key to authorize the connection.
         """
@@ -52,8 +54,10 @@ class SpoonacularFacade(object):
     def get_recipe_ids_for_ingredients(self, ingredients,
                                        limit=config.RECIPE_LIMIT):
         """Returns recipe ids from the Spoonacular API given ingredients.
+
         Enforces the RECIPE_LIMIT parameter in the config file. Or the one
         passed to the limit argument here.
+
         Args:
             ingredients: str, a comma separated list of ingredient strings.
             limit: int, max recipe ids to return.
@@ -70,6 +74,7 @@ class SpoonacularFacade(object):
 
     def get_random_recipe(self, tags=None):
         """Returns a random recipe from the Spoonacular API.
+
         Args:
             tags: str, a comma separated list of tags. Valid tags can be any
                 from the following Spoonacular sets:
@@ -77,6 +82,7 @@ class SpoonacularFacade(object):
                     - Diets: https://spoonacular.com/food-api/docs#Diets
                     - Cuisines: https://spoonacular.com/food-api/docs#Cuisines
                     - Intolerances: https://spoonacular.com/food-api/docs#Intolerances
+
         Returns:
             A dictionary (json-like) containing the data for the random recipe.
         """
@@ -86,6 +92,7 @@ class SpoonacularFacade(object):
 
     def get_random_alcoholic_beverage_recipe_id(self):
         """Returns a single random alcoholic beverage recipe id from the API.
+
         Returns:
             A single int Spoonacular recipe id.
         """
@@ -101,6 +108,7 @@ class SpoonacularFacade(object):
 
     def get_recipes_for_ids(self, ids):
         """Gets recipes from the API given a set of ids.
+
         Args:
             ids: list of one or more Spoonacular recipe ids.
         Returns:
@@ -117,9 +125,11 @@ class SpoonacularFacade(object):
     @classmethod
     def format_recipe_title_link_as_markdown(cls, recipe_data):
         """Formats a json-like dictionary of recipe data as a markdown link.
+
         Expects that recipe data matches the Spoonacular JSON response
         structure as seen here:
             https://spoonacular.com/food-api/docs#Search-Recipes-by-Ingredients
+
         Args:
             recipe_data: dict of recipe data from the Spoonacular API.
         Returns:
@@ -131,9 +141,11 @@ class SpoonacularFacade(object):
     @classmethod
     def format_recipe_data_as_html(cls, recipe_data):
         """Formats a json-like dictionary of recipe data as HTML.
+
         Expects that recipe data matches the Spoonacular JSON response
         structure as seen here:
             https://spoonacular.com/food-api/docs#Search-Recipes-by-Ingredients
+
         Args:
             recipe_data: dict of recipe data from the Spoonacular API.
         Returns:
