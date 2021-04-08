@@ -4,6 +4,7 @@ import logging
 import re
 
 from spoonacular import API
+from telegram.utils.helpers import escape_markdown
 
 from remy import config
 
@@ -135,7 +136,7 @@ class SpoonacularFacade(object):
         Returns:
             String representation of the recipe markdown link.
         """
-        title = strip_tags(recipe_data["title"])
+        title = escape_markdown(strip_tags(recipe_data["title"]).strip(), 2)
         return f"**[{title}]({recipe_data['sourceUrl']})**"
 
     @classmethod
@@ -156,9 +157,14 @@ class SpoonacularFacade(object):
             in recipe_data["extendedIngredients"]
         ])
 
-        instructions = re.sub(
-            " +", " ",
-            strip_tags(recipe_data['instructions'])).strip()
+        raw_instructions = recipe_data['instructions']
+        if not raw_instructions:
+            instructions = "This recipe didn't have instructions! =O"
+        else:
+            # Clean up instructions
+            instructions = re.sub(
+                " +", " ",
+                strip_tags(raw_instructions)).strip()
 
         formatted = (
             f"<b>{strip_tags(recipe_data['title'])}</b>\n"
