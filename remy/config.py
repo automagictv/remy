@@ -87,4 +87,5 @@ ALLOWED_TAGS = [
     "fingerfood",
     "snack",
     "drink",
+    "",
 ]
