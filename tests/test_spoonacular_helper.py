@@ -12,6 +12,13 @@ class FakeResponse:
         return self.jsondict
 
 
+def test_strip_tags_strips():
+    """Confirm that we actually strip HTML tags."""
+    html = "<p>naked</p>"
+    stripped = spoonacular_helper.strip_tags(html)
+    assert stripped == "naked"
+
+
 class TestSpoonacularFacade:
     """General note: the spoonacular.API constructor does not call the API.
     So it doesn't need to be mocked for all test api calls. We only have to 
