@@ -36,7 +36,7 @@ def test_format_message_and_get_parse_mode_returns_markdown_tuple():
     )
 
     expected_msg = (
-        f"This recipe was too long to send here! Here's the "
+        f"This recipe was too long to send here\! Here's the "
         f"link instead: {md_msg}"
     )
 
