@@ -41,6 +41,11 @@ def strip_tags(html):
     return stripper.get_data()
 
 
+class QuotaError(Exception):
+    """Custom error to handle quota issues."""
+    pass
+
+
 class SpoonacularFacade(object):
 
     def __init__(self, api_key=config.SPOONACULAR_KEY):
@@ -51,6 +56,40 @@ class SpoonacularFacade(object):
         """
         self.client = API(api_key)
         logging.info("Spoonacular client created.")
+
+    def check_status_and_raise(self, response):
+        """Checks to see if we've hit our points quota for the day.
+        
+        The primary purpose of this method is to raise a custom status that we
+        can handle so our bot doesn't crash.
+
+        An error status would look something like this: {
+            'status': 'failure',
+            'code': 402,
+            'message': 'Your daily points limit of 150 has been reached...'
+        }
+        
+        Any other format (e.g. a list) indicates that we did not get a quota
+        error.
+
+        Args:
+            response: A Spoonacular response object.
+        Returns:
+            None
+        Raises:
+            QuotaError if we have exceeded our quota.
+        """
+        content = response.json()
+        logging.info(content)
+        if isinstance(content, list):
+            return
+
+        status = content.get("status")
+        code = content.get("code")
+        message = content.get("message")
+
+        if status == "failure" and code == 402:
+            raise QuotaError(message)
 
     def get_recipe_ids_for_ingredients(self, ingredients,
                                        limit=config.RECIPE_LIMIT):
@@ -68,6 +107,7 @@ class SpoonacularFacade(object):
         logging.info(
             f"Calling Spoonacular to search by ingredients: {ingredients}")
         response = self.client.search_recipes_by_ingredients(ingredients)
+        self.check_status_and_raise(response)
         recipe_data = response.json()
         logging.info(f"Retrieved {len(recipe_data)} recipes."
                      f" Limit of {limit} will be enforced.")
@@ -89,7 +129,9 @@ class SpoonacularFacade(object):
         """
         logging.info(f"Calling Spoonacular to get a random recipe with tags"
                      f" {tags}")
-        return self.client.get_random_recipes(tags=tags).json()["recipes"][0]
+        response = self.client.get_random_recipes(tags=tags)
+        self.check_status_and_raise(response)
+        return response.json()["recipes"][0]
 
     def get_random_alcoholic_beverage_recipe_id(self):
         """Returns a single random alcoholic beverage recipe id from the API.
@@ -105,6 +147,7 @@ class SpoonacularFacade(object):
             sort="random",
             number=1
         )
+        self.check_status_and_raise(response)
         return response.json()["results"][0]["id"]
 
     def get_recipes_for_ids(self, ids):
@@ -119,6 +162,7 @@ class SpoonacularFacade(object):
         logging.info(f"Getting recipes for the following ids: {ids}")
         ids_param = ','.join([str(_id) for _id in ids])
         response = self.client.get_recipe_information_bulk(ids_param)
+        self.check_status_and_raise(response)
         recipes = response.json()
         logging.info(f"Retrieved data for {len(recipes)} recipes.")
         return recipes
