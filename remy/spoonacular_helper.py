@@ -80,7 +80,6 @@ class SpoonacularFacade(object):
             QuotaError if we have exceeded our quota.
         """
         content = response.json()
-        logging.info(content)
         if isinstance(content, list):
             return
 
