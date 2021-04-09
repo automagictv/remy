@@ -7,6 +7,7 @@ from spoonacular import API
 from telegram.utils.helpers import escape_markdown
 
 from remy import config
+from remy import exceptions
 
 
 class HTMLStripper(HTMLParser):
@@ -39,11 +40,6 @@ def strip_tags(html):
     stripper = HTMLStripper()
     stripper.feed(html)
     return stripper.get_data()
-
-
-class QuotaError(Exception):
-    """Custom error to handle quota issues."""
-    pass
 
 
 class SpoonacularFacade(object):
@@ -88,7 +84,7 @@ class SpoonacularFacade(object):
         message = content.get("message")
 
         if status == "failure" and code == 402:
-            raise QuotaError(message)
+            raise exceptions.QuotaError(message)
 
     def get_recipe_ids_for_ingredients(self, ingredients,
                                        limit=config.RECIPE_LIMIT):
