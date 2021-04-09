@@ -24,6 +24,8 @@
  - Config
    - Keys / tokens
    - Constants
+ - Exceptions
+   - Handles various errors so we deal with them in our bot
  - Runner
    - Logging
    - Main / listener
