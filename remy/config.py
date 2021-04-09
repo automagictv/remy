@@ -10,16 +10,17 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-SPOONACULAR_KEY = os.environ.get("SPOONACULAR_KEY")
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-
-RECIPE_LIMIT = 3
-
+# Telegram Constants
+# Default to a fake Telegram token for testing purposes if none is provided.
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", f"{'1' * 10}:{'A' * 35}")
 # Current message character limit is 4096
 # https://core.telegram.org/method/messages.sendMessage 
 # https://limits.tginfo.me/en
 TELEGRAM_MESSAGE_CHAR_LIMIT = 4096
 
+# Spoonacular Constants
+SPOONACULAR_KEY = os.environ.get("SPOONACULAR_KEY", "TESTKEY")
+RECIPE_LIMIT = 3
 ALLOWED_TAGS = [
     # Diets https://spoonacular.com/food-api/docs#Diets
     "gluten free",
