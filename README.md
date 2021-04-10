@@ -1,5 +1,5 @@
 # remy
-A [Telegram](https://telegram.org/) bot that will send you recipes for the ingredients in your fridge. This was built for a video tutorial [here]().
+A [Telegram](https://telegram.org/) bot that will send you recipes for the ingredients in your fridge. This was built for a video tutorial [here](https://youtu.be/FYfX9Wn76_E).
 
 <img src="https://static.wikia.nocookie.net/pixar/images/5/56/Ratatouille-remy2.jpg/revision/latest/scale-to-width-down/619?cb=20110512131040" width="180" height="200" />
 
